@@ -16,6 +16,7 @@
 */
 
 #pragma once
+#include <array>
 
 #include <libdevcore/Common.h>
 #include <libdevcore/Exceptions.h>
@@ -77,7 +78,8 @@ struct Solution
     WorkPackage work;                              // WorkPackage this solution refers to
     std::chrono::steady_clock::time_point tstamp;  // Timestamp of found solution
     unsigned midx;                                 // Originating miner Id
+    std::array<uint8_t, 65> signature;             // LIMONATA: Miner signature
+    h160 minerAddress;                             // LIMONATA: Miner address
 };
-
 }  // namespace eth
 }  // namespace dev

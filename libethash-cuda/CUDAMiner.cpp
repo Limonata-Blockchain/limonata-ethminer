@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with ethminer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <libdevcore/Signer.h>
 #include <libethcore/Farm.h>
 #include <ethash/ethash.hpp>
 
@@ -412,8 +413,18 @@ void CUDAMiner::search(
                 {
                     uint64_t nonce = nonce_base + gids[i];
 
-                    Farm::f().submitProof(
-                        Solution{nonce, mixes[i], w, std::chrono::steady_clock::now(), m_index});
+                    Solution sol;
+                    sol.nonce = nonce;
+                    sol.mixHash = mixes[i];
+                    sol.work = w;
+                    sol.tstamp = std::chrono::steady_clock::now();
+                    sol.midx = m_index;
+                    // LIMONATA: Sign the header hash
+                    if (dev::Signer::getInstance().hasKey()) {
+                        sol.signature = dev::Signer::getInstance().sign(w.header);
+                        sol.minerAddress = dev::Signer::getInstance().getAddress();
+                    }
+                    Farm::f().submitProof(sol);
                     cudalog << EthWhite << "Job: " << w.header.abridged() << " Sol: 0x"
                             << toHex(nonce) << EthReset;
                 }

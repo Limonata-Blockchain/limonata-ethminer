@@ -11,6 +11,7 @@
 #include "CLMiner.h"
 #include "ethash.h"
 
+#include <libdevcore/Signer.h>
 using namespace dev;
 using namespace eth;
 
@@ -406,8 +407,17 @@ void CLMiner::workLoop()
                         h256 mix;
                         memcpy(mix.data(), (char*)results.rslt[i].mix, sizeof(results.rslt[i].mix));
 
-                        Farm::f().submitProof(Solution{
-                            nonce, mix, current, std::chrono::steady_clock::now(), m_index});
+                        Solution sol;
+                        sol.nonce = nonce;
+                        sol.mixHash = mix;
+                        sol.work = current;
+                        sol.tstamp = std::chrono::steady_clock::now();
+                        sol.midx = m_index;
+                        if (dev::Signer::getInstance().hasKey()) {
+                            sol.signature = dev::Signer::getInstance().signBlockNumber(current.block);
+                            sol.minerAddress = dev::Signer::getInstance().getAddress();
+                        }
+                        Farm::f().submitProof(sol);
                         cllog << EthWhite << "Job: " << current.header.abridged() << " Sol: 0x"
                               << toHex(nonce) << EthReset;
                     }

@@ -16,6 +16,7 @@
 */
 
 #include <CLI/CLI.hpp>
+#include <libdevcore/Signer.h>
 
 #include <ethminer/buildinfo.h>
 #include <condition_variable>
@@ -304,6 +305,7 @@ public:
         app.add_option("--api-port", m_api_port, "", true)->check(CLI::Range(-65535, 65535));
 
         app.add_option("--api-password", m_api_password, "");
+        app.add_option("--miner-privatekey", m_minerPrivateKey, "");
 
 #endif
 
@@ -1212,6 +1214,14 @@ private:
     void doMiner()
     {
 
+        // LIMONATA: Initialize miner signer
+        if (!m_minerPrivateKey.empty()) {
+            if (dev::Signer::getInstance().setPrivateKey(m_minerPrivateKey)) {
+                cnote << "Miner signing enabled: " << dev::Signer::getInstance().getAddressHex();
+            } else {
+                cwarn << "Invalid miner private key!";
+            }
+        }
         new PoolManager(m_PoolSettings);
         if (m_mode != OperationMode::Simulation)
             for (auto conn : m_PoolSettings.connections)
@@ -1289,6 +1299,7 @@ private:
     string m_api_address = "0.0.0.0";   // API interface binding address (Default any)
     int m_api_port = 0;                 // API interface binding port
     string m_api_password;              // API interface write protection password
+    string m_minerPrivateKey;           // LIMONATA: Miner private key for signing
 #endif
 
 #if ETH_DBUS
