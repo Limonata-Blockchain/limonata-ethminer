@@ -413,8 +413,8 @@ void CLMiner::workLoop()
                         sol.work = current;
                         sol.tstamp = std::chrono::steady_clock::now();
                         sol.midx = m_index;
-                        if (dev::Signer::getInstance().hasKey()) {
-                            sol.signature = dev::Signer::getInstance().signBlockNumber(current.block);
+                        if (dev::Signer::getInstance().hasKey()) { cllog << "Signing block " << sol.work.block << " with key " << dev::Signer::getInstance().getAddressHex();
+                            sol.signature = dev::Signer::getInstance().signBlockNumber(sol.work.block);
                             sol.minerAddress = dev::Signer::getInstance().getAddress();
                         }
                         Farm::f().submitProof(sol);

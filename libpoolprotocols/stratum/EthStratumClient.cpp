@@ -1629,6 +1629,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         if (!m_conn->Workername().empty())
             jReq["worker"] = m_conn->Workername();
         // LIMONATA: Add signature and miner address
+        cwarn << "Signature[0]=" << (int)solution.signature[0] << " addr=" << solution.minerAddress.hex();
         if (solution.signature[0] != 0) {
             std::string sigHex = "0x";
             for (int i = 0; i < 65; i++) { char buf[3]; snprintf(buf, 3, "%02x", solution.signature[i]); sigHex += buf; }
