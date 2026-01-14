@@ -10,7 +10,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       
@@ -31,7 +31,7 @@ jobs:
           tar -czvf ethminer-limonata-linux-amd64.tar.gz ethminer
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: build/ethminer/ethminer-limonata-linux-amd64.tar.gz
@@ -39,7 +39,7 @@ jobs:
   build-windows:
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       
@@ -55,7 +55,7 @@ jobs:
           Compress-Archive -Path build/ethminer/Release/ethminer.exe -DestinationPath ethminer-limonata-windows-amd64.zip
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: ethminer-limonata-windows-amd64.zip
@@ -66,7 +66,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
