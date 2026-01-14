@@ -22,7 +22,7 @@ jobs:
       - name: Build
         run: |
           mkdir build && cd build
-          cmake .. -DETHASHCL=ON -DETHASHCUDA=OFF
+          cmake .. -DETHASHCL=ON -DETHASHCUDA=OFF -DHUNTER_ENABLED=OFF
           cmake --build . --config Release -j$(nproc)
       
       - name: Package
@@ -37,17 +37,21 @@ jobs:
           path: build/ethminer/ethminer-limonata-linux-amd64.tar.gz
 
   build-windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
       
+      - name: Install vcpkg dependencies
+        run: |
+          vcpkg install boost-filesystem:x64-windows boost-thread:x64-windows boost-system:x64-windows boost-program-options:x64-windows boost-date-time:x64-windows openssl:x64-windows
+      
       - name: Build
         run: |
           mkdir build
           cd build
-          cmake .. -G "Visual Studio 16 2019" -A x64 -DETHASHCL=ON -DETHASHCUDA=OFF
+          cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DETHASHCL=ON -DETHASHCUDA=OFF -DHUNTER_ENABLED=OFF
           cmake --build . --config Release
       
       - name: Package
