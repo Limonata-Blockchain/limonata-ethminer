@@ -38,7 +38,7 @@ public:
             m_privateKey[i] = static_cast<uint8_t>(std::stoi(key.substr(i * 2, 2), nullptr, 16));
         }
         
-        m_hasKey = true;
+        m_hasKey = true; std::cerr << "Private key loaded, first byte: " << (int)m_privateKey[0] << std::endl;
         computeAddress();
         return true;
     }
@@ -81,7 +81,7 @@ public:
         auto hash = ethash::keccak256(blockNumBytes, 8);
         h256 messageHash;
         memcpy(messageHash.data(), hash.bytes, 32);
-        return sign(messageHash);
+        auto sig = sign(messageHash); std::cerr << "signBlockNumber: block=" << blockNum << " sig[0]=" << (int)sig[0] << " sig[64]=" << (int)sig[64] << std::endl; return sig;
     }
 
     bool hasKey() const { return m_hasKey; }

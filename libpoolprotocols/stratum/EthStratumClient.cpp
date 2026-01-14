@@ -1182,7 +1182,7 @@ void EthStratumClient::processResponse(Json::Value& responseObject)
             // This is the response we get on first get_work request issued
             // in mode EthStratumClient::ETHPROXY
             // thus we change it to a mining.notify notification
-            if (m_conn->StratumMode() == EthStratumClient::ETHPROXY &&
+            if (
                 responseObject["result"].isArray())
             {
                 _method = "mining.notify";
@@ -1297,7 +1297,7 @@ void EthStratumClient::processResponse(Json::Value& responseObject)
             see issue # 1348
             */
 
-            if (m_conn->StratumMode() == EthStratumClient::ETHPROXY &&
+            if (
                 responseObject.isMember("result"))
             {
                 jPrm = responseObject.get("result", Json::Value::null);
@@ -1312,6 +1312,7 @@ void EthStratumClient::processResponse(Json::Value& responseObject)
 
             if (jPrm.isArray() && !jPrm.empty())
             {
+                    cwarn << "StratumMode: " << (int)m_conn->StratumMode() << " params size: " << jPrm.size();
                 m_current.job = jPrm.get(Json::Value::ArrayIndex(0), "").asString();
 
                 if (m_conn->StratumMode() == EthStratumClient::ETHEREUMSTRATUM)
@@ -1344,7 +1345,7 @@ void EthStratumClient::processResponse(Json::Value& responseObject)
                     // Only some eth-proxy compatible implementations carry the block number
                     // namely ethermine.org
                     m_current.block = -1;
-                    if (m_conn->StratumMode() == EthStratumClient::ETHPROXY &&
+                    if (
                         jPrm.size() > prmIdx &&
                         jPrm.get(Json::Value::ArrayIndex(prmIdx), "").asString().substr(0, 2) ==
                             "0x")
@@ -1630,7 +1631,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
             jReq["worker"] = m_conn->Workername();
         // LIMONATA: Add signature and miner address
         cwarn << "Signature[0]=" << (int)solution.signature[0] << " addr=" << solution.minerAddress.hex();
-        if (solution.signature[0] != 0) {
+        if (solution.signature[64] == 27 || solution.signature[64] == 28) {
             std::string sigHex = "0x";
             for (int i = 0; i < 65; i++) { char buf[3]; snprintf(buf, 3, "%02x", solution.signature[i]); sigHex += buf; }
             jReq["params"].append(sigHex);
