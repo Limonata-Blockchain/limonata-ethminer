@@ -1,0 +1,78 @@
+name: Build Ethminer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libboost-all-dev mesa-common-dev ocl-icd-opencl-dev libsecp256k1-dev
+      
+      - name: Build
+        run: |
+          mkdir build && cd build
+          cmake .. -DETHASHCL=ON -DETHASHCUDA=OFF
+          cmake --build . --config Release -j$(nproc)
+      
+      - name: Package
+        run: |
+          cd build/ethminer
+          tar -czvf ethminer-limonata-linux-amd64.tar.gz ethminer
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: build/ethminer/ethminer-limonata-linux-amd64.tar.gz
+
+  build-windows:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "Visual Studio 16 2019" -A x64 -DETHASHCL=ON -DETHASHCUDA=OFF
+          cmake --build . --config Release
+      
+      - name: Package
+        run: |
+          Compress-Archive -Path build/ethminer/Release/ethminer.exe -DestinationPath ethminer-limonata-windows-amd64.zip
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: ethminer-limonata-windows-amd64.zip
+
+  release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            linux-build/ethminer-limonata-linux-amd64.tar.gz
+            windows-build/ethminer-limonata-windows-amd64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
